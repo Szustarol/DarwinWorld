@@ -15,8 +15,8 @@ public class WrappedMap extends AbstractGrassMap{
     public final Vector2D jungleSize;
     public final Vector2D junglePosition;
 
-    private Random generator;
-    private float foodEnergy;
+    private final Random generator;
+    private final float foodEnergy;
 
     int jungleCount = 0;
     int restCount = 0;
@@ -30,7 +30,7 @@ public class WrappedMap extends AbstractGrassMap{
     public int getJungleAnimalCount(){
         int otherCount = 0;
         for(int x = junglePosition.x; x < junglePosition.x + jungleSize.x; x++){
-            for(int y = junglePosition.x; y < junglePosition.x + jungleSize.x; y++){
+            for(int y = junglePosition.y; y < junglePosition.y + jungleSize.y; y++){
                 if(animalPositions.containsKey(new Vector2D(x, y)))
                     otherCount+=1;
             }
@@ -97,15 +97,6 @@ public class WrappedMap extends AbstractGrassMap{
     }
 
     @Override
-    public void afterRemoval(Vector2D fromPosition, IMapElement elem) {
-        if(isInJungle(fromPosition))
-            jungleCount--;
-        else
-            restCount--;
-    }
-
-
-    @Override
     public Vector2D targetPositionMapping(Vector2D position){
         return new Vector2D(
                 Math.floorMod(position.x, mapSize.x),
@@ -138,7 +129,7 @@ public class WrappedMap extends AbstractGrassMap{
                 Vector2D pos = piece.getPosition();
                 if(animalPositions.containsKey(pos)){
                     LinkedList<Animal> an = animalPositions.get(pos);
-                    an.sort((animal, t1) -> {if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
+                    an.sort((animal, t1) -> {if(animal == t1) return 0; if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
                     //get most healthy animals
                     Animal[] best = an.stream().filter(animal -> animal.getEnergy() == an.getLast().getEnergy()).toArray(Animal[]::new);
                     float energyToSpare = this.foodEnergy/best.length;

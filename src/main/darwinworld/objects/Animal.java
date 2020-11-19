@@ -16,6 +16,8 @@ public class Animal implements IMapElement{
     private LinkedList<IPositionChangeObserver> observers;
     private static MapObjectImage mapImage = null;
     private float energy;
+    private Animal lastDescendant = null;
+
     public Genotype genotype;
     public int deathEpoch = -1;
     public int aliveFor = 1;
@@ -25,17 +27,20 @@ public class Animal implements IMapElement{
     public boolean tracingBirths = false;
     public LinkedList<Animal> parentsTracing;
 
-    public void notifyBirthTracers(){
+    public void notifyBirthTracers(Animal born){
         parentsTracing.removeIf(animal ->{
             if(animal.tracingBirths){
-                animal.nDescendantsAfter++;
-                animal.notifyBirthTracers();
+                if(animal.lastDescendant != born) {
+                    animal.nDescendantsAfter++;
+                    animal.lastDescendant = born;
+                }
+                animal.notifyBirthTracers(born);
                 return false;
             }
             else if(animal.energy == 0 && animal.parentsTracing.size() == 0){
                 return true;
             }
-            animal.notifyBirthTracers();
+            animal.notifyBirthTracers(born);
             return false;
         });
     }
@@ -54,13 +59,7 @@ public class Animal implements IMapElement{
     }
 
     public Vector2D getPosition(){//required for tests
-        Vector2D d = new Vector2D(position.x, position.y);
-        return d;
-    }
-
-    @Override
-    public boolean consumedByAnimal() {
-        return false;
+        return new Vector2D(position.x, position.y);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class Animal implements IMapElement{
 
     private void AnimalConstruct(IWorldMap map, Vector2D position){
         parentsTracing = new LinkedList<>();
-        this.observers = new LinkedList<IPositionChangeObserver>();
+        this.observers = new LinkedList<>();
         orientation = MapDirection.NORTH;
         this.map = map;
         if(mapImage == null)

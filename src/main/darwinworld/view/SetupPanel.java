@@ -60,7 +60,7 @@ public class SetupPanel extends JPanel {
 
 
     public SetupResult getSetup(){
-        SetupResult r = new SetupResult(
+        return new SetupResult(
                 (int)spinners.get(0).getValue(),
                 (int)spinners.get(1).getValue(),
                 (int)spinners.get(2).getValue(),
@@ -69,7 +69,6 @@ public class SetupPanel extends JPanel {
                 (double)spinners.get(5).getValue(),
                 (double)spinners.get(6).getValue()
         );
-        return r;
     }
 
 
@@ -79,7 +78,6 @@ public class SetupPanel extends JPanel {
 
         twoMap = new JCheckBox(Translations.getTranslation("two_map"));
 
-        String jsonString;
         try{
             ObjectMapper om = new ObjectMapper();
             defaultSetup = om.readValue(new File("parameters.json"), SetupResult.class);

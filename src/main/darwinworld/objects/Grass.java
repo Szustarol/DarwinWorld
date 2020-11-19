@@ -8,10 +8,6 @@ public class Grass implements IMapElement {
     static MapObjectImage mapImage = null;
     public  float energy;
 
-    public float getEnergy(){
-        return energy;
-    }
-
     public Grass(Vector2D position, float energy){
         this.energy = energy;
         if(mapImage == null)
@@ -21,11 +17,6 @@ public class Grass implements IMapElement {
 
     public Vector2D getPosition(){
         return new Vector2D(position.x, position.y);
-    }
-
-    @Override
-    public boolean consumedByAnimal() {
-        return true;
     }
 
     @Override

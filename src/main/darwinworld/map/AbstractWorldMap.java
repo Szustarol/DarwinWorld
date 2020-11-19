@@ -91,7 +91,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
             objs.addAll(animalPositions.get(position));
         if(otherElementsPresent(position))
             objs.add(otherElementAt(position));
-        return  objs.toArray(new IMapElement[objs.size()]);
+        return  objs.toArray(new IMapElement[0]);
     }
 
     @Override
@@ -114,7 +114,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
             // test if can breed
             if(animalPositions.get(key).size() > 1) {
                 LinkedList<Animal> anims = animalPositions.get(key);
-                anims.sort((animal, t1) -> {if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
+                anims.sort((animal, t1) -> {if(t1 == animal) return 0; if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
                 if(anims.getLast().getEnergy() > 0.5 && anims.get(anims.size()-2).getEnergy() > 0.5){
                     breedable.add(
                             new Animal[]{anims.getLast(), anims.get(anims.size()-2)}

@@ -4,7 +4,6 @@ import main.darwinworld.Translations;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.io.FileWriter;
 import java.util.LinkedList;
 
@@ -20,8 +19,8 @@ public class StatTracer {
     private int targetEpochs;
 
     public static JFrame parent;
-    private static LinkedList<StatTracer> statTracersEngine1 = new LinkedList<>();
-    private static LinkedList<StatTracer> statTracersEngine2 = new LinkedList<>();
+    private static final LinkedList<StatTracer> statTracersEngine1 = new LinkedList<>();
+    private static final LinkedList<StatTracer> statTracersEngine2 = new LinkedList<>();
 
     private StatTracer(){
         animalsNumerator = 0;
@@ -51,14 +50,12 @@ public class StatTracer {
            statTracer.avgEnergyNumerator += averageEnergy;
 
            if(statTracer.count >= statTracer.targetEpochs) {
-               StringBuilder sResult = new StringBuilder("{\n");
-               sResult.append("\t\"noEpochs\":").append(statTracer.count).append(",\n");
-               sResult.append("\t\"avgChildren\":").append(statTracer.avgChildrenNumerator/statTracer.count).append(",\n");
-               sResult.append("\t\"avgLifespan\":").append(statTracer.avgLifespanNumerator /statTracer.count).append(",\n");
-               sResult.append("\t\"avgGrass\":").append(statTracer.grassNumerator/statTracer.count).append(",\n");
-               sResult.append("\t\"avgAnimals\":").append(statTracer.animalsNumerator/statTracer.count).append(",\n");
-               sResult.append("\t\"avgEnergy\":").append(statTracer.avgEnergyNumerator /statTracer.count).append("\n}\n");
-               String fileContent = sResult.toString();
+               String fileContent = "{\n" + "\t\"noEpochs\":" + statTracer.count + ",\n" +
+                       "\t\"avgChildren\":" + statTracer.avgChildrenNumerator / statTracer.count + ",\n" +
+                       "\t\"avgLifespan\":" + statTracer.avgLifespanNumerator / statTracer.count + ",\n" +
+                       "\t\"avgGrass\":" + statTracer.grassNumerator / statTracer.count + ",\n" +
+                       "\t\"avgAnimals\":" + statTracer.animalsNumerator / statTracer.count + ",\n" +
+                       "\t\"avgEnergy\":" + statTracer.avgEnergyNumerator / statTracer.count + "\n}\n";
                try {
                    FileWriter resultFile = new FileWriter(statTracer.savePath);
                    resultFile.write(fileContent);
@@ -77,7 +74,7 @@ public class StatTracer {
         JDialog getDialog = new JDialog(parent, Translations.getTranslation("select_epoch_n"));
         getDialog.setLayout(new BoxLayout(getDialog, BoxLayout.Y_AXIS));
         JLabel label = new JLabel(Translations.getTranslation("select_epoch_n_desc2"));
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(100, 10, 1000, 1));
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(100, 10, 5000, 1));
         JLabel textLabel = new JLabel(Translations.getTranslation("select_save_path"));
         JFormattedTextField tf = new JFormattedTextField();
         tf.setValue("result.json");
@@ -101,9 +98,7 @@ public class StatTracer {
         getDialog.add(tf);
         getDialog.add(okButton);
 
-
         getDialog.setVisible(true);
-        StatTracer st = new StatTracer();
     }
 
 }

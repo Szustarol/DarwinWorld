@@ -12,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.LinkedList;
 
 public class MapPanel extends JPanel {
     IWorldMap map=null;
@@ -27,6 +26,8 @@ public class MapPanel extends JPanel {
                 repaint();
             }
         });
+        super.repaint();
+        setPreferredSize(new Dimension(500, 200));
     }
 
     public void paint(Graphics g){

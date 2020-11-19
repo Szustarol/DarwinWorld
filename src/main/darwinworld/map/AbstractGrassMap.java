@@ -16,11 +16,8 @@ public abstract class AbstractGrassMap extends AbstractWorldMap {
         return otherElements.get(position);
     }
 
-    public abstract void afterRemoval(Vector2D fromPosition, IMapElement elem);
-
-
     public AbstractGrassMap(){
-        otherElements = new TreeMap<Vector2D, IMapElement>();
+        otherElements = new TreeMap<>();
     }
 
     @Override

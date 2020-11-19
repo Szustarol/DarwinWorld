@@ -5,6 +5,5 @@ import main.darwinworld.math.Vector2D;
 
 public interface IMapElement {
     Vector2D getPosition();
-    boolean consumedByAnimal();
     MapObjectImage getImageRepresentation();
 }

@@ -6,8 +6,6 @@ import main.darwinworld.objects.Animal;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 public class BirthTracer {
@@ -17,7 +15,7 @@ public class BirthTracer {
     public int childrenWhenTracingStarted;
     public int descendantsWhenTracingStarted;
 
-    private static LinkedList<BirthTracer> birthTracers = new LinkedList<>();
+    private static final LinkedList<BirthTracer> birthTracers = new LinkedList<>();
 
     public static JFrame parent;
 
@@ -51,7 +49,12 @@ public class BirthTracer {
                 dialogPanel.add(new JLabel(Translations.getTranslation("n_epochs") + ": " + birthTracer.nEpochs));
                 dialogPanel.add(new JLabel(Translations.getTranslation("n_children") + ": " + ch));
                 dialogPanel.add(new JLabel(Translations.getTranslation("n_descendants") + ": " + dc));
-                traceDialog.setSize(new Dimension(300, 100));
+                if(birthTracer.animal.getEnergy() == 0){
+                    dialogPanel.add(new JLabel(
+                       Translations.getTranslation("death_epoch") + ": " + birthTracer.animal.deathEpoch
+                    ));
+                }
+                traceDialog.setSize(new Dimension(300, 140));
                 traceDialog.setVisible(true);
             }
         });
@@ -59,9 +62,19 @@ public class BirthTracer {
     }
 
     public static void getFromUser(Animal a) {
+        for(BirthTracer bt : birthTracers){
+            if(bt.animal == a){
+                JDialog jd = new JDialog(parent, Translations.getTranslation("animal_already_traced"));
+                jd.setSize(new Dimension(250, 70));
+                jd.add(new JLabel(Translations.getTranslation("animal_already_traced")));
+                jd.setVisible(true);
+                return;
+            }
+        }
+
         JDialog getDialog = new JDialog(parent, Translations.getTranslation("select_epoch_n"));
         JLabel label = new JLabel(Translations.getTranslation("select_epoch_n_desc"));
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(100, 10, 3000, 1));
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(100, 10, 1300, 1));
         JButton okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             int value = (int)spinner.getValue();

@@ -3,7 +3,6 @@ package main.darwinworld.view;
 import main.darwinworld.Translations;
 import main.darwinworld.engine.IEngine;
 import main.darwinworld.logic.Genotype;
-import main.darwinworld.objects.Animal;
 import main.darwinworld.view.charts.AnimalGrassChart;
 import main.darwinworld.view.misc.BirthTracer;
 import main.darwinworld.view.misc.StatTracer;
@@ -14,7 +13,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.LinkedList;
 
 public class EnginePanel extends JPanel {
 
@@ -35,11 +33,7 @@ public class EnginePanel extends JPanel {
 
     JLabel avgLifespan, avgChildren, avgEnergy, dominantGenotype;
 
-    private AnimalGrassChart animalGrassChart;
-
-    public boolean isRunning(){
-        return (this.stepTimer != null && stepTimer.isRunning());
-    }
+    private final AnimalGrassChart animalGrassChart;
 
     public void forceStop(){
         if(stepTimer != null){
@@ -83,7 +77,7 @@ public class EnginePanel extends JPanel {
     }
 
     private void startButtonAction(ActionEvent e){
-        stepTimer = new Timer(((int) delay.getValue()), this::stepButtonAction);
+        stepTimer = new Timer((delay.getValue()), this::stepButtonAction);
         stepTimer.start();
         stepButton.setEnabled(false);
         stopButton.setEnabled(true);
@@ -155,18 +149,13 @@ public class EnginePanel extends JPanel {
         stepButton.addActionListener(this::stepButtonAction);
         startButton.addActionListener(this::startButtonAction);
         stopButton.addActionListener(this::stopButtonAction);
-        saveButton.addActionListener(event ->{
-            if(engineIndex == 1)
-                StatTracer.addStatTracer(true);
-            else
-                StatTracer.addStatTracer(false);
-        });
+        saveButton.addActionListener(event -> StatTracer.addStatTracer(engineIndex == 1));
 
         add(sliderLabel);
         add(delay);
 
         JPanel buttonPanel = new JPanel();
-        BoxLayout bl2 = new BoxLayout(buttonPanel, BoxLayout.X_AXIS);
+        new BoxLayout(buttonPanel, BoxLayout.X_AXIS);
 
 
         JButton[] buttons = new JButton[]{stopButton,startButton,stepButton};

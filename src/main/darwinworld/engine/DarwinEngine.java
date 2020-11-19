@@ -11,19 +11,18 @@ import java.util.*;
 public class DarwinEngine implements IEngine{
 
     int runSteps;
-    private LinkedList<Animal> animals;
-    private Random generator;
-    private IWorldMap map;
+    private final LinkedList<Animal> animals;
+    private final Random generator;
+    private final IWorldMap map;
     private int epoch;
-    private float foodEnergy;
-    private float energyDecline;
+    private final float energyDecline;
     private float ener;
     private long deadLifespanSum = 0;
     private long nDead = 0;
     private Genotype bestGenotype = null;
     private double averageChildrenNominator = 0;
 
-    private Map<int[], Integer> genotypeCounts;
+    private final Map<int[], Integer> genotypeCounts;
 
     private void addGenotype(int [] genotype){
         if(genotypeCounts.containsKey(genotype))
@@ -85,8 +84,6 @@ public class DarwinEngine implements IEngine{
             return 0;
         });
 
-
-        this.foodEnergy = foodEnergy;
         this.energyDecline = energyDecline;
         this.runSteps = runSteps;
         this.animals = new LinkedList<>();
@@ -154,7 +151,6 @@ public class DarwinEngine implements IEngine{
 
         //make animals breed
         Animal[][] pairs = map.getBreedablePairs();
-        int nbirths = 0;
         for(Animal [] pair : pairs){
             Animal a = pair[0] , b = pair[1];
             //find free spot around a and b
@@ -174,7 +170,6 @@ public class DarwinEngine implements IEngine{
             }
             if(possibleBirthPlace == null)
                 possibleBirthPlace = map.targetPositionMapping(a.getPosition().add(md.toUnitVector()));
-            nbirths +=1;
             Genotype g = a.genotype.giveBirth(b.genotype);
             Animal child = new Animal(map, possibleBirthPlace, g);
             a.setEnergy(a.getEnergy()-0.25f);
@@ -185,7 +180,7 @@ public class DarwinEngine implements IEngine{
             child.parentsTracing.add(b);
             child.setEnergy(0.5f);
             addGenotype(child.genotype.asArray());
-            child.notifyBirthTracers();
+            child.notifyBirthTracers(child);
             animals.add(child);
             averageChildrenNominator+=2;
         }
@@ -206,16 +201,8 @@ public class DarwinEngine implements IEngine{
 
             bestGenotype = Genotype.fromArray(bGenes);
 
-            animals.forEach(animal -> {
-                if(animal.genotype.equals(bestGenotype)){
-                    animal.best = true;
-                }
-                else{
-                    animal.best = false;
-                }
-            });
+            animals.forEach(animal -> animal.best = animal.genotype.equals(bestGenotype));
         }
-
 
         return true;
     }

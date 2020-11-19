@@ -1,16 +1,14 @@
 package main.darwinworld.logic;
 
 import main.darwinworld.map.MapDirection;
-import main.darwinworld.math.Vector2D;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Vector;
 
 public class Genotype {
 
     private Random generator;
-    private int geneCount[];
+    private int[] geneCount;
     private int nGenes = 0;
 
     private void validate(){
@@ -47,7 +45,6 @@ public class Genotype {
 
     @Override
     public String toString(){
-        String s = "";
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < geneCount.length; i++){
             for(int j = 0; j < geneCount[i]; j++){
@@ -68,7 +65,7 @@ public class Genotype {
         geneCount = new int[]{0,0,0,0,0,0,0,0};
 
         for(int i = 0; i < nGenes; i++){
-            Integer c = Math.floorMod(generator.nextInt(), 8);
+            int c = Math.floorMod(generator.nextInt(), 8);
             geneCount[c] += 1;
         }
 
@@ -100,8 +97,8 @@ public class Genotype {
             split2 = temp;
         }
 
-        int thisCountSums[] = new int[]{geneCount[0],0,0,0,0,0,0,0};
-        int otherCountSums[] = new int[]{other.geneCount[0],0,0,0,0,0,0,0};
+        int[] thisCountSums = new int[]{geneCount[0],0,0,0,0,0,0,0};
+        int[] otherCountSums = new int[]{other.geneCount[0],0,0,0,0,0,0,0};
         for(int i = 1; i < 8; i++){
             thisCountSums[i] = thisCountSums[i-1] + geneCount[i];
             otherCountSums[i] = otherCountSums[i-1] + other.geneCount[i];
