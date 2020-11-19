@@ -2,11 +2,19 @@ package main.darwinworld.view;
 
 import main.darwinworld.Translations;
 import main.darwinworld.engine.IEngine;
+import main.darwinworld.logic.Genotype;
+import main.darwinworld.objects.Animal;
+import main.darwinworld.view.charts.AnimalGrassChart;
+import main.darwinworld.view.misc.BirthTracer;
+import main.darwinworld.view.misc.StatTracer;
+import org.jfree.chart.ChartPanel;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.LinkedList;
 
 public class EnginePanel extends JPanel {
 
@@ -15,18 +23,59 @@ public class EnginePanel extends JPanel {
 
     Timer stepTimer;
 
+    int engineIndex;
+
     JSlider delay;
     JButton startButton;
-    JButton pauseButton;
+    JButton stopButton;
     JButton stepButton;
+    JButton saveButton;
     private IEngine engine;
     private MapPanel mapPanel;
 
+    JLabel avgLifespan, avgChildren, avgEnergy, dominantGenotype;
+
+    private AnimalGrassChart animalGrassChart;
+
+    public boolean isRunning(){
+        return (this.stepTimer != null && stepTimer.isRunning());
+    }
+
+    public void forceStop(){
+        if(stepTimer != null){
+            stepTimer.stop();
+            stepTimer = null;
+        }
+        stopButton.setEnabled(false);
+    }
+
+    private void appendEngineData(){
+        if(engine != null && mapPanel != null){
+            animalGrassChart.add(engine.getAnimalCount(), engine.getOtherElementsCount());
+        }
+    }
 
     private void step(){
+        BirthTracer.update();
         engine.step();
-        if(this.mapPanel != null)
+        if(this.mapPanel != null) {
             mapPanel.repaint();
+        }
+        appendEngineData();
+        Genotype g = engine.mostFrequentGenotype();
+        String genoString;
+        if(g == null)
+            genoString = "";
+        else
+            genoString = g.toString();
+        avgEnergy.setText(Translations.getTranslation("avg_energy") + ": " + engine.getAverageEnergy());
+        avgChildren.setText(Translations.getTranslation("avg_children") + ": " + engine.getAverageChildren());
+        avgLifespan.setText(Translations.getTranslation("avg_lifespan") + ": " + engine.getAverageLifespan());
+        dominantGenotype.setText(Translations.getTranslation("dominant_genotype") + ": \n" + genoString);
+
+        StatTracer.update(engineIndex == 1, engine.getAverageEnergy(),
+                engine.getOtherElementsCount(), engine.getAnimalCount(),
+                engine.getAverageLifespan(), engine.getAverageChildren());
     }
 
     private void stepButtonAction(ActionEvent e){
@@ -36,26 +85,56 @@ public class EnginePanel extends JPanel {
     private void startButtonAction(ActionEvent e){
         stepTimer = new Timer(((int) delay.getValue()), this::stepButtonAction);
         stepTimer.start();
+        stepButton.setEnabled(false);
+        stopButton.setEnabled(true);
+        startButton.setEnabled(false);
     }
 
     private  void stopButtonAction(ActionEvent e){
-        if(stepTimer != null)
-            stepTimer.stop();
+        forceStop();
+        stepButton.setEnabled(true);
+        startButton.setEnabled(true);
+        stopButton.setEnabled(false);
+    }
+
+    private void speedChanged(ChangeEvent e){
+        if(stepTimer != null && stepTimer.isRunning()){
+            this.stepTimer.setDelay(delay.getValue());
+        }
     }
 
     void setEngine(IEngine e, MapPanel p){
         this.engine = e;
-        if (p != null)
+        if (p != null) {
             this.mapPanel = p;
+            stepButton.setEnabled(true);
+            startButton.setEnabled(true);
+            if(animalGrassChart != null)
+                animalGrassChart.reset();
+            appendEngineData();
+        }
     }
 
-    EnginePanel(){
+    EnginePanel(int engineIndex){
 
-        GridBagLayout gbl = new GridBagLayout();
-        setLayout(gbl);
+        this.engineIndex = engineIndex;
+
+        BoxLayout bl = new BoxLayout(this, BoxLayout.Y_AXIS);
+        setLayout(bl);
+
 
         TitledBorder b = BorderFactory.createTitledBorder(Translations.getTranslation("engine_setup"));
         setBorder(b);
+
+        avgEnergy = new JLabel(Translations.getTranslation("avg_energy"));
+        avgChildren = new JLabel(Translations.getTranslation("avg_children"));
+        avgLifespan = new JLabel(Translations.getTranslation("avg_lifespan"));
+        dominantGenotype = new JLabel(Translations.getTranslation("dominant_genotype"));
+
+        JLabel[] labels = {avgEnergy, avgChildren, avgLifespan, dominantGenotype};
+
+        for(JLabel l : labels)
+            l.setAlignmentX(CENTER_ALIGNMENT);
 
         JLabel sliderLabel = new JLabel(Translations.getTranslation("time_delay"));
 
@@ -65,32 +144,51 @@ public class EnginePanel extends JPanel {
         delay.setPaintTicks(true);
         delay.setPaintLabels(true);
 
+        delay.addChangeListener(this::speedChanged);
+
 
         startButton = new JButton(Translations.getTranslation("start_sim"));
-        pauseButton = new JButton(Translations.getTranslation("pause_sim"));
+        stopButton = new JButton(Translations.getTranslation("pause_sim"));
         stepButton = new JButton(Translations.getTranslation("step_sim"));
+        saveButton = new JButton(UIManager.getIcon("FileView.floppyDriveIcon"));
 
         stepButton.addActionListener(this::stepButtonAction);
         startButton.addActionListener(this::startButtonAction);
-        pauseButton.addActionListener(this::stopButtonAction);
+        stopButton.addActionListener(this::stopButtonAction);
+        saveButton.addActionListener(event ->{
+            if(engineIndex == 1)
+                StatTracer.addStatTracer(true);
+            else
+                StatTracer.addStatTracer(false);
+        });
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.weightx = 1.0f;
-        gbc.weighty = 1.0f;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        add(sliderLabel, gbc);
-        gbc.gridy++;
-        add(delay, gbc);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(startButton, gbc);
-        gbc.gridy++;
-        add(pauseButton, gbc);
-        gbc.gridy++;
-        add(stepButton, gbc);
-        gbc.gridy++;
+        add(sliderLabel);
+        add(delay);
+
+        JPanel buttonPanel = new JPanel();
+        BoxLayout bl2 = new BoxLayout(buttonPanel, BoxLayout.X_AXIS);
+
+
+        JButton[] buttons = new JButton[]{stopButton,startButton,stepButton};
+        for(JButton btn : buttons){
+            btn.setEnabled(false);
+            buttonPanel.add(btn);
+        }
+        buttonPanel.add(saveButton);
+
+        animalGrassChart = new AnimalGrassChart(Translations.getTranslation("animal_grass_chart"));
+        ChartPanel chartPanel = new ChartPanel(animalGrassChart.getChart());
+        chartPanel.setPreferredSize(new Dimension(buttonPanel.getSize().width, chartPanel.getPreferredSize().height));
+        add(chartPanel);
+
+
+        add(buttonPanel);
+
+        add(dominantGenotype);
+        add(avgEnergy);
+        add(avgChildren);
+        add(avgLifespan);
+
 
     }
 

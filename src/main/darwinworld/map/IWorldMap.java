@@ -16,6 +16,8 @@ import java.awt.*;
  */
 
 public interface IWorldMap extends IPositionChangeObserver {
+    int getOtherElementsSize();
+
     /**
      * Indicate if any object can move to the given position.
      *

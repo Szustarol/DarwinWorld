@@ -1,0 +1,9 @@
+{
+  "n_animals": 12,
+  "map_width": 20,
+  "map_height": 20,
+  "jungle_percent": 60,
+  "food_value": 0.15,
+  "food_decay": 0.05,
+  "food_starting": 0.7
+}

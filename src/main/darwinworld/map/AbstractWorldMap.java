@@ -1,6 +1,5 @@
 package main.darwinworld.map;
 
-import main.darwinworld.IPositionChangeObserver;
 import main.darwinworld.math.Vector2D;
 import main.darwinworld.objects.Animal;
 import main.darwinworld.objects.IMapElement;
@@ -125,6 +124,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
         }
         return breedable.toArray(new Animal[breedable.size()][]);
     }
+
 
     public abstract void makeStep();
 

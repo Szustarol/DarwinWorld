@@ -11,14 +11,6 @@ import javax.swing.*;
 
 public class World {
     public static void main(String [] args){
-        /*
-        IWorldMap map = new WrappedMap(new Vector2D(100, 100), new Vector2D(20, 20), 0.1f);
-        DarwinEngine engine = new DarwinEngine(2, 100, map, 0.01f);
-        for(int i = 0; i < 100; i++) {
-            engine.step();
-        }
-
-         */
         Translations.init("pl_PL");
         MainWindow mainWindow = new MainWindow();
         mainWindow.setVisible(true);

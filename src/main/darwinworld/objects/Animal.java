@@ -17,6 +17,28 @@ public class Animal implements IMapElement{
     private static MapObjectImage mapImage = null;
     private float energy;
     public Genotype genotype;
+    public int deathEpoch = -1;
+    public int aliveFor = 1;
+    public int nChildren = 0;
+    public int nDescendantsAfter = 0;
+    public boolean best = false;
+    public boolean tracingBirths = false;
+    public LinkedList<Animal> parentsTracing;
+
+    public void notifyBirthTracers(){
+        parentsTracing.removeIf(animal ->{
+            if(animal.tracingBirths){
+                animal.nDescendantsAfter++;
+                animal.notifyBirthTracers();
+                return false;
+            }
+            else if(animal.energy == 0 && animal.parentsTracing.size() == 0){
+                return true;
+            }
+            animal.notifyBirthTracers();
+            return false;
+        });
+    }
 
     public void setEnergy(float energy){
         if(energy > 1)
@@ -27,7 +49,6 @@ public class Animal implements IMapElement{
             this.energy = energy;
     }
 
-    @Override
     public float getEnergy() {
         return energy;
     }
@@ -48,6 +69,7 @@ public class Animal implements IMapElement{
     }
 
     private void AnimalConstruct(IWorldMap map, Vector2D position){
+        parentsTracing = new LinkedList<>();
         this.observers = new LinkedList<IPositionChangeObserver>();
         orientation = MapDirection.NORTH;
         this.map = map;

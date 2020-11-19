@@ -3,6 +3,7 @@ package main.darwinworld.logic;
 import main.darwinworld.map.MapDirection;
 import main.darwinworld.math.Vector2D;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Vector;
 
@@ -34,13 +35,23 @@ public class Genotype {
         }
     }
 
+    public int[] asArray(){
+        return Arrays.copyOf(geneCount, geneCount.length);
+    }
+
+    public static Genotype fromArray(int [] genes){
+        Genotype g = new Genotype();
+        g.geneCount = Arrays.copyOf(genes, 8);
+        return g;
+    }
+
     @Override
     public String toString(){
         String s = "";
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < geneCount.length; i++){
-            for(int j = 0; j < geneCount[j]; j++){
-                sb.append(j);
+            for(int j = 0; j < geneCount[i]; j++){
+                sb.append(i);
                 sb.append(" ");
             }
         }
@@ -62,6 +73,15 @@ public class Genotype {
         }
 
         validate();
+    }
+
+    public boolean equals(Genotype other){
+        if(other == null) return false;
+        for(int i = 0; i < 8; i++){
+            if(this.geneCount[i] != other.geneCount[i])
+                return false;
+        }
+        return true;
     }
 
     public Genotype giveBirth(Genotype other){

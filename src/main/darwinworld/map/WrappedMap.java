@@ -6,10 +6,7 @@ import main.darwinworld.objects.Grass;
 import main.darwinworld.objects.IMapElement;
 
 import java.awt.*;
-import java.lang.reflect.Array;
-import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Random;
 
 public class WrappedMap extends AbstractGrassMap{
@@ -43,7 +40,7 @@ public class WrappedMap extends AbstractGrassMap{
 
     //places one grass in the remaining region
     private void placeRest(){
-        if(restCount >= mapSize.x*mapSize.y-jungleSize.x*jungleSize.y- animalPositions.size()-otherElements.size()+getJungleAnimalCount()+jungleCount)
+        if(restCount >= mapSize.x*mapSize.y-jungleSize.x*jungleSize.y- animalPositions.size()+getJungleAnimalCount())
             return;
         int x = Math.floorMod(generator.nextInt(), mapSize.x);
         int y = Math.floorMod(generator.nextInt(), mapSize.y);
@@ -129,6 +126,11 @@ public class WrappedMap extends AbstractGrassMap{
     }
 
     @Override
+    public int getOtherElementsSize() {
+        return jungleCount + restCount;
+    }
+
+    @Override
     public void updateAfterMoving() {
         LinkedList<Vector2D> toRemove = new LinkedList<>();
         for(IMapElement piece : otherElements.values()){
@@ -139,7 +141,7 @@ public class WrappedMap extends AbstractGrassMap{
                     an.sort((animal, t1) -> {if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
                     //get most healthy animals
                     Animal[] best = an.stream().filter(animal -> animal.getEnergy() == an.getLast().getEnergy()).toArray(Animal[]::new);
-                    float energyToSpare = piece.getEnergy()/best.length;
+                    float energyToSpare = this.foodEnergy/best.length;
                     for(Animal a : best){
                         a.setEnergy(a.getEnergy()+energyToSpare);
                     }
