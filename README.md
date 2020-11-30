@@ -86,8 +86,8 @@ precisely - how many children it has born and how many descendants it has after 
 of steps. If the animal is dead, the epoch of death will be dispalyed as well.
 
 After enough steps pass, a popup will appear with the requested information.
-Multiple animals can be traced at once, but a single animal can only have
-one tracer set up at a time.
+Multiple animals can be traced at once and a single animal can be traced
+multiple times.
 
 #### Default starting parameters
 

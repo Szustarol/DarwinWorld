@@ -1,5 +1,6 @@
 package main.darwinworld.logic;
 
+import jdk.internal.util.xml.impl.Pair;
 import main.darwinworld.map.MapDirection;
 
 import java.util.Arrays;
@@ -18,6 +19,7 @@ public class Genotype {
             valid = true;
             for(int i = 0; i < 8; i++){
                 if(geneCount[i] == 0) {
+                    valid = false;
                     int prev = Math.floorMod(i-1,8);
                     int next = Math.floorMod(i+1, 8);
                     if(geneCount[prev] > 0) {
@@ -38,9 +40,10 @@ public class Genotype {
     }
 
     public static Genotype fromArray(int [] genes){
-        Genotype g = new Genotype();
-        g.geneCount = Arrays.copyOf(genes, 8);
-        return g;
+        Genotype genotype = new Genotype();
+        genotype.geneCount = Arrays.copyOf(genes, 8);
+        genotype.validate();
+        return genotype;
     }
 
     @Override
@@ -81,13 +84,9 @@ public class Genotype {
         return true;
     }
 
-    public Genotype giveBirth(Genotype other){
-        Genotype g = new Genotype();
-        g.nGenes = this.nGenes;
-        g.geneCount = new int[]{0,0,0,0,0,0,0,0};
-        g.generator = new Random();
+    private int[] getSplitPositions(){
         int split = Math.floorMod(generator.nextInt(), nGenes-2)+1;
-        int split2 = split;
+        int split2 = Math.floorMod(generator.nextInt(), nGenes-2)+1;
         while(split == split2){
             split2 = Math.floorMod(generator.nextInt(), nGenes-2)+1;
         }
@@ -96,6 +95,16 @@ public class Genotype {
             split = split2;
             split2 = temp;
         }
+        return new int[]{split, split2};
+    }
+
+    public Genotype giveBirth(Genotype other){
+        Genotype newGenotype = new Genotype();
+        newGenotype.nGenes = this.nGenes;
+        newGenotype.geneCount = new int[]{0,0,0,0,0,0,0,0};
+        newGenotype.generator = new Random();
+
+        int [] splits = getSplitPositions();
 
         int[] thisCountSums = new int[]{geneCount[0],0,0,0,0,0,0,0};
         int[] otherCountSums = new int[]{other.geneCount[0],0,0,0,0,0,0,0};
@@ -104,27 +113,26 @@ public class Genotype {
             otherCountSums[i] = otherCountSums[i-1] + other.geneCount[i];
         }
 
-
         int thisidx = 0, otheridx = 0;
         for(int i = 0; i < nGenes; i++){
             while (thisCountSums[thisidx] <= i) thisidx++;
             while (otherCountSums[otheridx] <= i) otheridx++;
-            if(i < split || i > split2){//take from this
-                g.geneCount[thisidx]++;
+            if(i < splits[0] || i > splits[1]){//take from this
+                newGenotype.geneCount[thisidx]++;
             }
             else{//take from the other
-                g.geneCount[otheridx]++;
+                newGenotype.geneCount[otheridx]++;
             }
         }
-        g.validate();
-        return g;
+        newGenotype.validate();
+        return newGenotype;
     }
 
     public MapDirection getMove(){
-        int r = Math.floorMod(generator.nextInt(), nGenes);
+        int randomInt = Math.floorMod(generator.nextInt(), nGenes);
         int index = -1;
-        while(r >= 0){
-            r -= geneCount[++index];
+        while(randomInt >= 0){
+            randomInt -= geneCount[++index];
         }
         return MapDirection.values()[index];
     }

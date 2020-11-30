@@ -10,13 +10,13 @@ import java.util.*;
 
 public class DarwinEngine implements IEngine{
 
-    int runSteps;
+    private final int runSteps;
     private final LinkedList<Animal> animals;
     private final Random generator;
     private final IWorldMap map;
     private int epoch;
     private final float energyDecline;
-    private float ener;
+    private float averageEnergy;
     private long deadLifespanSum = 0;
     private long nDead = 0;
     private Genotype bestGenotype = null;
@@ -53,7 +53,7 @@ public class DarwinEngine implements IEngine{
     }
 
     public float getAverageEnergy(){
-        return ener;
+        return averageEnergy;
     }
 
     public int getEpoch(){
@@ -68,7 +68,7 @@ public class DarwinEngine implements IEngine{
     @Override
     public void run() {
         for(int i = 0; i < runSteps; i++)
-            run();
+            step();
     }
 
     public DarwinEngine(int numStartingAnimals, int runSteps, IWorldMap map, float energyDecline, float startingEnergy){
@@ -105,23 +105,24 @@ public class DarwinEngine implements IEngine{
                 }
                 animalPos = new Vector2D(x, y);
             }
-            Animal a = new Animal(map, map.targetPositionMapping(animalPos));
-            addGenotype(a.genotype.asArray());
-            a.setEnergy(startingEnergy);
-            animals.add(a);
+            Animal newAnimal = new Animal(map, map.targetPositionMapping(animalPos));
+            addGenotype(newAnimal.genotype.asArray());
+            newAnimal.setEnergy(startingEnergy);
+            animals.add(newAnimal);
         }
     }
 
-    @Override
-    public boolean step() {
-        //make animals hungry
+    private void stepHunger(){
         animals.forEach(animal -> animal.setEnergy(animal.getEnergy()-energyDecline));
-        ener = 0;
-        //make the dead rest
+    }
+
+    //returns average animal energy
+    private float stepRemoveDead(){
+        float energy = 0;
         animals.removeIf(animal -> {
             boolean dead = animal.getEnergy() <= 0;
             if(dead) {
-                averageChildrenNominator-=animal.nChildren;
+                averageChildrenNominator-=animal.children.size();
                 map.remove(animal);
                 deadLifespanSum += animal.aliveFor;
                 removeGenotype(animal.genotype.asArray());
@@ -131,64 +132,71 @@ public class DarwinEngine implements IEngine{
             return dead;});
 
         for(Animal a : animals){
-            ener += a.getEnergy();
+            energy += a.getEnergy();
         }
         if(animals.size() > 0)
-            ener /= animals.size();
+            energy /= animals.size();
         else
-            ener = 0;
+            energy = 0;
+        return energy;
+    }
 
-        //make animals move
-        animals.forEach(animal->{
-                animal.aliveFor++;
-                Vector2D p = animal.getPosition();
-                animal.move(animal.genotype.getMove());
-                animal.positionChanged(p, animal.getPosition());
-        });
+    //returns a random free spot on map around a given position
+    //or a random position if no spot is available at all
+    private Vector2D getFreeSpot(Vector2D around){
+        MapDirection md = MapDirection.NORTH;
+        int rot = Math.floorMod(generator.nextInt(), 7);
+        for(int i = 0; i < rot; i++){
+            md = md.next();
+        }
+        MapDirection base = md;
+        Vector2D possibleSpot = null;
+        while(md!=base.previous()) {
+            if(!map.animalPresentAt(map.targetPositionMapping(around.add(md.toUnitVector())))) {
+                possibleSpot = map.targetPositionMapping(around.add(md.toUnitVector()));
+                break;
+            }
+            md = md.next();
+        }
+        if(possibleSpot == null)
+            possibleSpot = map.targetPositionMapping(around.add(md.toUnitVector()));
+        return possibleSpot;
+    }
 
-        //make animals eat
-        map.updateAfterMoving();
-
-        //make animals breed
+    //returns true if something was born
+    private boolean stepBreed(){
+        boolean born = false;
         Animal[][] pairs = map.getBreedablePairs();
         for(Animal [] pair : pairs){
-            Animal a = pair[0] , b = pair[1];
-            //find free spot around a and b
-            MapDirection md = MapDirection.NORTH;
-            int rot = Math.floorMod(generator.nextInt(), 7);
-            for(int i = 0; i < rot; i++){
-                md = md.next();
-            }
-            MapDirection base = md;
-            Vector2D possibleBirthPlace = null;
-            while(md!=base.previous()) {
-                if(!map.animalPresentAt(map.targetPositionMapping(a.getPosition().add(md.toUnitVector())))) {
-                    possibleBirthPlace = map.targetPositionMapping(a.getPosition().add(md.toUnitVector()));
-                    break;
-                }
-                md = md.next();
-            }
-            if(possibleBirthPlace == null)
-                possibleBirthPlace = map.targetPositionMapping(a.getPosition().add(md.toUnitVector()));
-            Genotype g = a.genotype.giveBirth(b.genotype);
-            Animal child = new Animal(map, possibleBirthPlace, g);
-            a.setEnergy(a.getEnergy()-0.25f);
-            b.setEnergy(a.getEnergy()-0.25f);
-            a.nChildren++;
-            b.nChildren++;
-            child.parentsTracing.add(a);
-            child.parentsTracing.add(b);
+            born = true;
+            Animal firstParent = pair[0] , secondParent = pair[1];
+            //find free spot around firstParent and secondParent
+            Vector2D possibleBirthPlace = getFreeSpot(firstParent.getPosition());
+
+            Genotype bornGenotype = firstParent.genotype.giveBirth(secondParent.genotype);
+            Animal child = new Animal(map, possibleBirthPlace, bornGenotype);
+
+            firstParent.setEnergy(firstParent.getEnergy()-0.25f);
+            secondParent.setEnergy(firstParent.getEnergy()-0.25f);
+
+            firstParent.children.add(child);
+            secondParent.children.add(child);
+
             child.setEnergy(0.5f);
             addGenotype(child.genotype.asArray());
-            child.notifyBirthTracers(child);
+
             animals.add(child);
             averageChildrenNominator+=2;
         }
+        return born;
+    }
 
-        //make the grass grow
+    private void stepWorld(){
         map.makeStep();
         epoch++;
+    }
 
+    private void recalculateBestGenotype(){
         if(genotypeCounts.size() > 0) {
             Integer highestCount = -1;
             int[] bGenes = null;
@@ -203,6 +211,33 @@ public class DarwinEngine implements IEngine{
 
             animals.forEach(animal -> animal.best = animal.genotype.equals(bestGenotype));
         }
+    }
+
+    private void stepMove(){
+        animals.forEach(animal->{
+            animal.aliveFor++;
+            Vector2D p = animal.getPosition();
+            animal.move(animal.genotype.getMove());
+            animal.positionChanged(p, animal.getPosition());
+        });
+    }
+
+    @Override
+    public boolean step() {
+        //make animals hungry
+        stepHunger();
+        //make the dead rest
+        averageEnergy = stepRemoveDead();
+        //make animals move
+        stepMove();
+        //make animals eat
+        map.updateAfterMoving();
+        //make animals breed
+        stepBreed();
+        //make the grass grow
+        stepWorld();
+
+        recalculateBestGenotype();
 
         return true;
     }

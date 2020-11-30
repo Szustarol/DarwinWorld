@@ -5,7 +5,7 @@ import main.darwinworld.math.Vector2D;
 
 public class Grass implements IMapElement {
     private final Vector2D position;
-    static MapObjectImage mapImage = null;
+    private static MapObjectImage mapImage = null;
     public  float energy;
 
     public Grass(Vector2D position, float energy){

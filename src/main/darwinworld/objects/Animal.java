@@ -6,44 +6,39 @@ import main.darwinworld.logic.Genotype;
 import main.darwinworld.map.IWorldMap;
 import main.darwinworld.map.MapDirection;
 import main.darwinworld.math.Vector2D;
+import sun.reflect.generics.tree.Tree;
 
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
-public class Animal implements IMapElement{
+public class Animal implements IMapElement, Comparable<Animal> {
     private Vector2D position;
     private MapDirection orientation;
     private IWorldMap map;
     private LinkedList<IPositionChangeObserver> observers;
     private static MapObjectImage mapImage = null;
     private float energy;
-    private Animal lastDescendant = null;
+    private int animalID;
+
+    private static int newAnimalID = 0;
 
     public Genotype genotype;
     public int deathEpoch = -1;
     public int aliveFor = 1;
-    public int nChildren = 0;
-    public int nDescendantsAfter = 0;
     public boolean best = false;
-    public boolean tracingBirths = false;
-    public LinkedList<Animal> parentsTracing;
+    public LinkedList<Animal> children;
 
-    public void notifyBirthTracers(Animal born){
-        parentsTracing.removeIf(animal ->{
-            if(animal.tracingBirths){
-                if(animal.lastDescendant != born) {
-                    animal.nDescendantsAfter++;
-                    animal.lastDescendant = born;
-                }
-                animal.notifyBirthTracers(born);
-                return false;
-            }
-            else if(animal.energy == 0 && animal.parentsTracing.size() == 0){
-                return true;
-            }
-            animal.notifyBirthTracers(born);
-            return false;
-        });
+    public Set<Animal> getDescendants(){
+        TreeSet<Animal> descendantsSet = new TreeSet<>();
+        for(Animal child : children){
+            descendantsSet.addAll(child.getDescendants());
+            descendantsSet.add(child);
+        }
+        return descendantsSet;
     }
+
 
     public void setEnergy(float energy){
         if(energy > 1)
@@ -68,7 +63,9 @@ public class Animal implements IMapElement{
     }
 
     private void AnimalConstruct(IWorldMap map, Vector2D position){
-        parentsTracing = new LinkedList<>();
+        animalID = newAnimalID;
+        newAnimalID++;
+        children = new LinkedList<>();
         this.observers = new LinkedList<>();
         orientation = MapDirection.NORTH;
         this.map = map;
@@ -112,5 +109,11 @@ public class Animal implements IMapElement{
 
     public void removeObserver(IPositionChangeObserver observer){
         observers.removeIf(obs -> obs == observer);
+    }
+
+
+    @Override
+    public int compareTo(Animal animal) {
+        return this.animalID - animal.animalID;
     }
 }

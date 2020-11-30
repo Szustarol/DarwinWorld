@@ -9,10 +9,6 @@ public class SetupResult {
     public double food_decay;
     public double food_starting;
 
-    public SetupResult() {
-
-    }
-
     public SetupResult(int a, int b, int c, int d, double e, double f, double g) {
         n_animals = a;
         map_width = b;

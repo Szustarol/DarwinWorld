@@ -13,12 +13,10 @@ import java.util.LinkedList;
 
 public class SetupPanel extends JPanel {
 
-    SetupResult defaultSetup;
+    private final LinkedList<JSpinner> spinners;
+    private final LinkedList<Double> spinnerDefaults;
 
-    LinkedList<JSpinner> spinners;
-    LinkedList<Double> spinnerDefaults;
-
-    JCheckBox twoMap;
+    private final JCheckBox twoMap;
 
     private void createSpinnerWithLabel(int gridx, int gridy, SpinnerNumberModel model, String labelText){
         JSpinner spinner = new JSpinner(model);
@@ -78,6 +76,7 @@ public class SetupPanel extends JPanel {
 
         twoMap = new JCheckBox(Translations.getTranslation("two_map"));
 
+        SetupResult defaultSetup;
         try{
             ObjectMapper om = new ObjectMapper();
             defaultSetup = om.readValue(new File("parameters.json"), SetupResult.class);

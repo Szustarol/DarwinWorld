@@ -8,16 +8,15 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 public class AnimalGrassChart {
-    JFreeChart lineChart;
-    XYSeries animalCount;
-    XYSeries grassCount;
-    XYSeriesCollection dataset;
-    int epoch_ctr = 0;
+    private final JFreeChart lineChart;
+    private final XYSeries animalCount;
+    private final XYSeries grassCount;
+    private int epoch_ctr = 0;
 
     public AnimalGrassChart(String title){
         animalCount = new XYSeries(Translations.getTranslation("animal_count"));
         grassCount = new XYSeries(Translations.getTranslation("grass_count"));
-        dataset = new XYSeriesCollection();
+        XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(animalCount);
         dataset.addSeries(grassCount);
         lineChart = ChartFactory.createXYLineChart(title,

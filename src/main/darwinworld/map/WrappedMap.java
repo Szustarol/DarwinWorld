@@ -18,8 +18,8 @@ public class WrappedMap extends AbstractGrassMap{
     private final Random generator;
     private final float foodEnergy;
 
-    int jungleCount = 0;
-    int restCount = 0;
+    private int jungleCount = 0;
+    private int restCount = 0;
 
     public boolean isInJungle(Vector2D pos){
         return pos.x >= junglePosition.x && pos.y >= junglePosition.y
@@ -133,8 +133,8 @@ public class WrappedMap extends AbstractGrassMap{
                     //get most healthy animals
                     Animal[] best = an.stream().filter(animal -> animal.getEnergy() == an.getLast().getEnergy()).toArray(Animal[]::new);
                     float energyToSpare = this.foodEnergy/best.length;
-                    for(Animal a : best){
-                        a.setEnergy(a.getEnergy()+energyToSpare);
+                    for(Animal oneOfBest : best){
+                        oneOfBest.setEnergy(oneOfBest.getEnergy()+energyToSpare);
                     }
                     toRemove.add(pos);
                     if(isInJungle(pos))

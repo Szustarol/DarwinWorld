@@ -28,8 +28,8 @@ public class BirthTracer {
         t.animal = a;
         t.nEpochs = nEpochs;
         t.epochsRemaining = nEpochs;
-        t.childrenWhenTracingStarted = a.nChildren;
-        t.descendantsWhenTracingStarted = a.nDescendantsAfter;
+        t.childrenWhenTracingStarted = a.children.size();
+        t.descendantsWhenTracingStarted = a.getDescendants().size();
         birthTracers.add(t);
     }
 
@@ -37,14 +37,13 @@ public class BirthTracer {
         birthTracers.forEach(birthTracer -> {
             birthTracer.epochsRemaining--;
             if(birthTracer.epochsRemaining == 0){
-                birthTracer.animal.tracingBirths = false;
                 JDialog traceDialog = new JDialog(parent, Translations.getTranslation("tracing_result"));
                 JPanel dialogPanel = new JPanel();
                 traceDialog.add(dialogPanel);
                 BoxLayout bl = new BoxLayout(dialogPanel, BoxLayout.Y_AXIS);
                 dialogPanel.setLayout(bl);
-                int ch = birthTracer.animal.nChildren-birthTracer.childrenWhenTracingStarted;
-                int dc = birthTracer.animal.nDescendantsAfter-birthTracer.descendantsWhenTracingStarted;
+                int ch = birthTracer.animal.children.size()-birthTracer.childrenWhenTracingStarted;
+                int dc = birthTracer.animal.getDescendants().size()-birthTracer.descendantsWhenTracingStarted;
                 dialogPanel.add(new JLabel(Translations.getTranslation("tracing_result")));
                 dialogPanel.add(new JLabel(Translations.getTranslation("n_epochs") + ": " + birthTracer.nEpochs));
                 dialogPanel.add(new JLabel(Translations.getTranslation("n_children") + ": " + ch));
@@ -62,23 +61,12 @@ public class BirthTracer {
     }
 
     public static void getFromUser(Animal a) {
-        for(BirthTracer bt : birthTracers){
-            if(bt.animal == a){
-                JDialog jd = new JDialog(parent, Translations.getTranslation("animal_already_traced"));
-                jd.setSize(new Dimension(250, 70));
-                jd.add(new JLabel(Translations.getTranslation("animal_already_traced")));
-                jd.setVisible(true);
-                return;
-            }
-        }
-
         JDialog getDialog = new JDialog(parent, Translations.getTranslation("select_epoch_n"));
         JLabel label = new JLabel(Translations.getTranslation("select_epoch_n_desc"));
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(100, 10, 1300, 1));
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(100, 10, 3000, 1));
         JButton okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             int value = (int)spinner.getValue();
-            a.tracingBirths = true;
             addBirthTracer(a, value);
             getDialog.dispose();
         });
