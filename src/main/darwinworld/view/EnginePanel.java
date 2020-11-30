@@ -16,18 +16,17 @@ import java.awt.event.ActionEvent;
 
 public class EnginePanel extends JPanel {
 
-    static final int min_ms = 0;
-    static final int max_ms = 3000;
+    private static final int min_ms = 0;
+    private static final int max_ms = 3000;
 
-    Timer stepTimer;
+    private Timer stepTimer;
 
-    int engineIndex;
+    private final int engineIndex;
 
-    JSlider delay;
-    JButton startButton;
-    JButton stopButton;
-    JButton stepButton;
-    JButton saveButton;
+    private final JSlider delay;
+    private final JButton startButton;
+    private final JButton stopButton;
+    private final JButton stepButton;
     private IEngine engine;
     private MapPanel mapPanel;
 
@@ -144,7 +143,7 @@ public class EnginePanel extends JPanel {
         startButton = new JButton(Translations.getTranslation("start_sim"));
         stopButton = new JButton(Translations.getTranslation("pause_sim"));
         stepButton = new JButton(Translations.getTranslation("step_sim"));
-        saveButton = new JButton(UIManager.getIcon("FileView.floppyDriveIcon"));
+        JButton saveButton = new JButton(UIManager.getIcon("FileView.floppyDriveIcon"));
 
         stepButton.addActionListener(this::stepButtonAction);
         startButton.addActionListener(this::startButtonAction);

@@ -22,16 +22,16 @@ public class SetupPanel extends JPanel {
         JSpinner spinner = new JSpinner(model);
         JLabel label = new JLabel(Translations.getTranslation(labelText));
         label.setLabelFor(spinner);
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(1,4, 1, 4);
-        c.gridx = gridx;
-        c.gridy = gridy;
-        c.anchor = GridBagConstraints.WEST;
-        add(label, c);
-        c.gridx++;
-        c.anchor = GridBagConstraints.EAST;
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(1,4, 1, 4);
+        gbc.gridx = gridx;
+        gbc.gridy = gridy;
+        gbc.anchor = GridBagConstraints.WEST;
+        add(label, gbc);
+        gbc.gridx++;
+        gbc.anchor = GridBagConstraints.EAST;
         spinners.add(spinner);
-        add(spinner, c);
+        add(spinner, gbc);
         if(model.getValue() instanceof Integer)
             spinnerDefaults.add(((Integer)model.getValue()).doubleValue());
         else

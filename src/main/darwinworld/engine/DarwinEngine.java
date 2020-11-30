@@ -72,12 +72,12 @@ public class DarwinEngine implements IEngine{
     }
 
     public DarwinEngine(int numStartingAnimals, int runSteps, IWorldMap map, float energyDecline, float startingEnergy){
-        genotypeCounts = new TreeMap<>((o1, o2) -> {
-            if(o1.length < o2.length) return -1;
-            for (int i = 0; i < o1.length; i++) {
-                if (o1[i] > o2[i]) {
+        genotypeCounts = new TreeMap<>((genotype1, genotype2) -> {
+            if(genotype1.length < genotype2.length) return -1;
+            for (int i = 0; i < genotype1.length; i++) {
+                if (genotype1[i] > genotype2[i]) {
                     return 1;
-                } else if (o1[i] < o2[i]) {
+                } else if (genotype1[i] < genotype2[i]) {
                     return -1;
                 }
             }
@@ -144,22 +144,22 @@ public class DarwinEngine implements IEngine{
     //returns a random free spot on map around a given position
     //or a random position if no spot is available at all
     private Vector2D getFreeSpot(Vector2D around){
-        MapDirection md = MapDirection.NORTH;
+        MapDirection targetDirection = MapDirection.NORTH;
         int rot = Math.floorMod(generator.nextInt(), 7);
         for(int i = 0; i < rot; i++){
-            md = md.next();
+            targetDirection = targetDirection.next();
         }
-        MapDirection base = md;
+        MapDirection base = targetDirection;
         Vector2D possibleSpot = null;
-        while(md!=base.previous()) {
-            if(!map.animalPresentAt(map.targetPositionMapping(around.add(md.toUnitVector())))) {
-                possibleSpot = map.targetPositionMapping(around.add(md.toUnitVector()));
+        while(targetDirection!=base.previous()) {
+            if(!map.animalPresentAt(map.targetPositionMapping(around.add(targetDirection.toUnitVector())))) {
+                possibleSpot = map.targetPositionMapping(around.add(targetDirection.toUnitVector()));
                 break;
             }
-            md = md.next();
+            targetDirection = targetDirection.next();
         }
         if(possibleSpot == null)
-            possibleSpot = map.targetPositionMapping(around.add(md.toUnitVector()));
+            possibleSpot = map.targetPositionMapping(around.add(targetDirection.toUnitVector()));
         return possibleSpot;
     }
 
@@ -216,9 +216,9 @@ public class DarwinEngine implements IEngine{
     private void stepMove(){
         animals.forEach(animal->{
             animal.aliveFor++;
-            Vector2D p = animal.getPosition();
+            Vector2D initialPosition = animal.getPosition();
             animal.move(animal.genotype.getMove());
-            animal.positionChanged(p, animal.getPosition());
+            animal.positionChanged(initialPosition, animal.getPosition());
         });
     }
 

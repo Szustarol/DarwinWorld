@@ -9,13 +9,14 @@ public class SetupResult {
     public double food_decay;
     public double food_starting;
 
-    public SetupResult(int a, int b, int c, int d, double e, double f, double g) {
-        n_animals = a;
-        map_width = b;
-        map_height = c;
-        jungle_percent = d;
-        food_value = e;
-        food_decay = f;
-        food_starting = g;
+    public SetupResult(int nAnimals, int mapWidth, int mapHeight,
+                       int junglePercent, double foodValue, double foodDecay, double startingFood) {
+        n_animals = nAnimals;
+        map_width = mapWidth;
+        map_height = mapHeight;
+        jungle_percent = junglePercent;
+        food_value = foodValue;
+        food_decay = foodDecay;
+        food_starting = startingFood;
     }
 }
