@@ -1,6 +1,6 @@
 package test.darwinworld;
 
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

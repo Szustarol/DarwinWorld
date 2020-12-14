@@ -1,6 +1,6 @@
 package main.darwinworld;
 
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.IMapElement;
 
 public interface IPositionChangeObserver {

@@ -2,7 +2,7 @@ package main.darwinworld.view;
 
 import main.darwinworld.Translations;
 import main.darwinworld.engine.IEngine;
-import main.darwinworld.logic.Genotype;
+import main.darwinworld.model.Genotype;
 import main.darwinworld.view.charts.AnimalGrassChart;
 import main.darwinworld.view.misc.BirthTracer;
 import main.darwinworld.view.misc.StatTracer;

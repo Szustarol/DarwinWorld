@@ -1,6 +1,7 @@
 package main.darwinworld.engine;
 
-import main.darwinworld.logic.Genotype;
+import main.darwinworld.model.Genotype;
+import main.darwinworld.objects.Animal;
 
 public interface IEngine {
     void run();
@@ -20,4 +21,6 @@ public interface IEngine {
     Genotype mostFrequentGenotype();
 
     double getAverageChildren();
+
+    boolean isAnimalDominant(Animal a);
 }

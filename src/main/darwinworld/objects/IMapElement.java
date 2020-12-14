@@ -1,7 +1,7 @@
 package main.darwinworld.objects;
 
 import main.darwinworld.MapObjectImage;
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 
 public interface IMapElement {
     Vector2D getPosition();

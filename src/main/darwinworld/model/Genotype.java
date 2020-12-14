@@ -1,6 +1,5 @@
-package main.darwinworld.logic;
+package main.darwinworld.model;
 
-import jdk.internal.util.xml.impl.Pair;
 import main.darwinworld.map.MapDirection;
 
 import java.util.Arrays;
@@ -11,6 +10,23 @@ public class Genotype {
     private Random generator;
     private int[] geneCount;
     private int nGenes = 0;
+
+    private Genotype(){
+        //raw constructor for giveBirth
+    }
+
+    public Genotype(int nGenes){
+        this.nGenes = nGenes;
+        generator = new Random();
+        geneCount = new int[]{0,0,0,0,0,0,0,0};
+
+        for(int i = 0; i < nGenes; i++){
+            int c = Math.floorMod(generator.nextInt(), 8);
+            geneCount[c] += 1;
+        }
+
+        validate();
+    }
 
     private void validate(){
         //genes flow down from neighbors if there is not enough of them
@@ -56,23 +72,6 @@ public class Genotype {
             }
         }
         return sb.toString();
-    }
-
-    private Genotype(){
-        //raw constructor for giveBirth
-    }
-
-    public Genotype(int nGenes){
-        this.nGenes = nGenes;
-        generator = new Random();
-        geneCount = new int[]{0,0,0,0,0,0,0,0};
-
-        for(int i = 0; i < nGenes; i++){
-            int c = Math.floorMod(generator.nextInt(), 8);
-            geneCount[c] += 1;
-        }
-
-        validate();
     }
 
     public boolean equals(Genotype other){

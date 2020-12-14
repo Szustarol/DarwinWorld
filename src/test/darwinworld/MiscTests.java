@@ -1,7 +1,7 @@
 package test.darwinworld;
 
 import main.darwinworld.map.MapDirection;
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.Grass;
 import org.junit.Test;
 

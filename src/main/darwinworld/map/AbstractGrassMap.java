@@ -1,6 +1,6 @@
 package main.darwinworld.map;
 
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.IMapElement;
 
 import java.util.TreeMap;

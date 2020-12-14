@@ -1,7 +1,7 @@
 package main.darwinworld.map;
 
 import main.darwinworld.IPositionChangeObserver;
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.Animal;
 import main.darwinworld.objects.IMapElement;
 
@@ -50,13 +50,15 @@ public interface IWorldMap extends IPositionChangeObserver {
      */
     boolean isOccupied(Vector2D position);
 
+    public Vector2D getFreeSpotAround(Vector2D position);
+
     boolean animalPresentAt(Vector2D position);
 
     void updateAfterMoving();
 
     void makeStep();
 
-    Color getTileColor(Vector2D position);
+    TileType getTileType(Vector2D position);
 
     Animal[][] getBreedablePairs();
 

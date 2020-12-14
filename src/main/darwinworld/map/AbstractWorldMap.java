@@ -1,11 +1,13 @@
 package main.darwinworld.map;
 
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.Animal;
 import main.darwinworld.objects.IMapElement;
 
 import java.awt.*;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.TreeMap;
 
 public abstract class AbstractWorldMap implements IWorldMap {
@@ -104,6 +106,34 @@ public abstract class AbstractWorldMap implements IWorldMap {
         }
     }
 
+    private LinkedList<Animal> animalsAtPositionSortedByEnergy(Vector2D position){
+        LinkedList<Animal> animals = animalPositions.get(position);
+        animals.sort((animal, animal2) -> {if(animal2 == animal) return 0; if(animal2.getEnergy() <= animal.getEnergy()) return 1; return -1;});
+        return animals;
+    }
+
+    public Animal[] nStrongestAnimalsAtPosition(Vector2D position, int n){
+        LinkedList<Animal> animalsAt = animalsAtPositionSortedByEnergy(position);
+        if(n < animalsAt.size())
+            n = animalsAt.size();
+        Animal[] result = new Animal[n];
+        Iterator<Animal> animalIterator = animalsAt.descendingIterator();
+        int idx = 0;
+        while(animalIterator.hasNext()){
+            result[idx] = animalIterator.next();
+            idx++;
+        }
+        return result;
+    }
+
+    public Animal[] allStrongestAnimalsAtPosition(Vector2D position){
+        LinkedList<Animal> animalsAt = animalsAtPositionSortedByEnergy(position);
+        if(animalsAt.size() == 0)
+            return new Animal[0];
+        float maxEnergy = animalsAt.getLast().getEnergy();
+        return animalsAt.stream().filter(animal -> animal.getEnergy() == maxEnergy).toArray(Animal[]::new);
+    }
+
     public Vector2D targetPositionMapping(Vector2D position){
         return position;
     }
@@ -113,11 +143,10 @@ public abstract class AbstractWorldMap implements IWorldMap {
         for(Vector2D key : animalPositions.keySet()){
             // test if can breed
             if(animalPositions.get(key).size() > 1) {
-                LinkedList<Animal> anims = animalPositions.get(key);
-                anims.sort((animal, t1) -> {if(t1 == animal) return 0; if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
-                if(anims.getLast().getEnergy() > 0.5 && anims.get(anims.size()-2).getEnergy() > 0.5){
+                Animal[] potentialParents = nStrongestAnimalsAtPosition(key, 2);
+                if(potentialParents.length == 2 && potentialParents[0].getEnergy() > 0.5 && potentialParents[1].getEnergy() > 0.5){
                     breedable.add(
-                            new Animal[]{anims.getLast(), anims.get(anims.size()-2)}
+                            potentialParents
                     );
                 }
             }
@@ -125,12 +154,32 @@ public abstract class AbstractWorldMap implements IWorldMap {
         return breedable.toArray(new Animal[breedable.size()][]);
     }
 
+    public Vector2D getFreeSpotAround(Vector2D around){
+        MapDirection targetDirection = MapDirection.NORTH;
+        Random generator = new Random();
+        int rot = Math.floorMod(generator.nextInt(), 7);
+        for(int i = 0; i < rot; i++){
+            targetDirection = targetDirection.next();
+        }
+        MapDirection base = targetDirection;
+        Vector2D possibleSpot = null;
+        while(targetDirection!=base.previous()) {
+            if(!animalPresentAt(targetPositionMapping(around.add(targetDirection.toUnitVector())))) {
+                possibleSpot = targetPositionMapping(around.add(targetDirection.toUnitVector()));
+                break;
+            }
+            targetDirection = targetDirection.next();
+        }
+        if(possibleSpot == null)
+            possibleSpot = targetPositionMapping(around.add(targetDirection.toUnitVector()));
+        return possibleSpot;
+    }
 
     public abstract void makeStep();
 
     public abstract void updateAfterMoving();
 
-    public Color getTileColor(Vector2D position){
-        return Color.BLACK;
+    public TileType getTileType(Vector2D position){
+        return TileType.PLAINS_TILE;
     }
 }

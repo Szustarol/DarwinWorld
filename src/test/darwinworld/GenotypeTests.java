@@ -1,6 +1,6 @@
 package test.darwinworld;
 
-import main.darwinworld.logic.Genotype;
+import main.darwinworld.model.Genotype;
 import org.junit.Test;
 import static org.junit.Assert.assertNotEquals;
 

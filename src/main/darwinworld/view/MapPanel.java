@@ -2,8 +2,10 @@ package main.darwinworld.view;
 
 import main.darwinworld.MapObjectImage;
 import main.darwinworld.Translations;
+import main.darwinworld.engine.IEngine;
 import main.darwinworld.map.IWorldMap;
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.map.TileType;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.Animal;
 import main.darwinworld.objects.IMapElement;
 import main.darwinworld.view.misc.BirthTracer;
@@ -14,7 +16,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class MapPanel extends JPanel {
-    IWorldMap map=null;
+    IWorldMap map = null;
+    IEngine engine = null;
 
     Vector2D clickPosition = null;
     Animal clickedAnimal = null;
@@ -30,11 +33,7 @@ public class MapPanel extends JPanel {
         setPreferredSize(new Dimension(500, 200));
     }
 
-    public void paint(Graphics g){
-        super.paintComponent(g);
-        if(map == null)
-            return;
-
+    private void paintMap(Graphics g){
         Vector2D lowerLeft = map.getBounds()[0];
         Vector2D upperRight = map.getBounds()[1];
 
@@ -48,7 +47,15 @@ public class MapPanel extends JPanel {
 
         for(int x = lowerLeft.x; x <= upperRight.x; x++) {
             for (int y = lowerLeft.y; y <= upperRight.y; y++) {
-                g.setColor(map.getTileColor(new Vector2D(x, y)));
+                TileType tileType = map.getTileType(new Vector2D(x, y));
+                switch (tileType){
+                    case JUNGLE_TILE:
+                        g.setColor(new Color(0x00, 0x6e, 0x33));
+                        break;
+                    case PLAINS_TILE:
+                        g.setColor(new Color(0x63, 0xc7, 0x92));
+                        break;
+                }
                 double xready = xoffset + (x - lowerLeft.x) * sqwidth;
                 double yready = yoffset + (height - (y - lowerLeft.y)-1) * sqwidth;
                 int x_cast = (int)xready;
@@ -90,7 +97,7 @@ public class MapPanel extends JPanel {
                     int barWidth = (int)(0.8*sqwidth);
                     int barHeight = (int)(0.2*sqwidth);
 
-                    if(a.best)
+                    if(engine != null && engine.isAnimalDominant(a))
                         g.setColor(Color.yellow);
                     else
                         g.setColor(Color.blue);
@@ -100,6 +107,9 @@ public class MapPanel extends JPanel {
                 }
             }
         }
+    }
+
+    private void handleAnimalClick(Graphics g){
         if(clickedAnimal != null){
             g.setColor(Color.black);
             g.drawRect(0, 0, 300, 100);
@@ -123,7 +133,7 @@ public class MapPanel extends JPanel {
                 Vector2D clickStart = new Vector2D(10, 70);
                 Vector2D clickEnd = new Vector2D(230, 95);
                 if(clickStart.lowerLeft(clickPosition).equals(clickStart)
-                && clickEnd.upperRight(clickPosition).equals(clickEnd)){
+                        && clickEnd.upperRight(clickPosition).equals(clickEnd)){
                     BirthTracer.getFromUser(clickedAnimal);
                 }
             }
@@ -132,10 +142,18 @@ public class MapPanel extends JPanel {
             clickPosition = null;
             clickedAnimal = null;
         }
+    }
 
+    public void paint(Graphics g){
+        super.paintComponent(g);
+        if(map == null)
+            return;
+        paintMap(g);
+        handleAnimalClick(g);
     }
 
     public void setMap(IWorldMap map){
         this.map = map;
     }
+    public void setEngine(IEngine engine){this.engine = engine;}
 }

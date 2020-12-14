@@ -38,7 +38,7 @@ public class SetupPanel extends JPanel {
             spinnerDefaults.add(((Double)model.getValue()));
     }
 
-    public boolean useTwoMap() {
+    public boolean useTwoMaps() {
         return twoMap.isSelected();
     }
 

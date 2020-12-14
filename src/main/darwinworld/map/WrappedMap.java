@@ -1,11 +1,10 @@
 package main.darwinworld.map;
 
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.Animal;
 import main.darwinworld.objects.Grass;
 import main.darwinworld.objects.IMapElement;
 
-import java.awt.*;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -110,10 +109,10 @@ public class WrappedMap extends AbstractGrassMap{
         placeRest();
     }
 
-    public Color getTileColor(Vector2D position){
+    public TileType getTileType(Vector2D position){
         if(isInJungle(position))
-            return new Color(0x00, 0x6e, 0x33);
-        return new Color(0x63, 0xc7, 0x92);
+            return TileType.JUNGLE_TILE;
+        return TileType.PLAINS_TILE;
     }
 
     @Override
@@ -128,14 +127,10 @@ public class WrappedMap extends AbstractGrassMap{
             if(piece instanceof Grass){
                 Vector2D pos = piece.getPosition();
                 if(animalPositions.containsKey(pos)){
-                    LinkedList<Animal> an = animalPositions.get(pos);
-                    an.sort((animal, t1) -> {if(animal == t1) return 0; if(t1.getEnergy() <= animal.getEnergy()) return 1; return -1;});
-                    //get most healthy animals
-                    Animal[] best = an.stream().filter(animal -> animal.getEnergy() == an.getLast().getEnergy()).toArray(Animal[]::new);
-                    float energyToSpare = this.foodEnergy/best.length;
-                    for(Animal oneOfBest : best){
-                        oneOfBest.setEnergy(oneOfBest.getEnergy()+energyToSpare);
-                    }
+                    Animal [] best = allStrongestAnimalsAtPosition(pos);
+                    ((Grass) piece).consume(best);
+
+
                     toRemove.add(pos);
                     if(isInJungle(pos))
                         jungleCount--;

@@ -2,16 +2,12 @@ package main.darwinworld.objects;
 
 import main.darwinworld.IPositionChangeObserver;
 import main.darwinworld.MapObjectImage;
-import main.darwinworld.logic.Genotype;
+import main.darwinworld.model.Genotype;
 import main.darwinworld.map.IWorldMap;
 import main.darwinworld.map.MapDirection;
-import main.darwinworld.math.Vector2D;
-import sun.reflect.generics.tree.Tree;
+import main.darwinworld.model.Vector2D;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class Animal implements IMapElement, Comparable<Animal> {
     private Vector2D position;
@@ -21,14 +17,31 @@ public class Animal implements IMapElement, Comparable<Animal> {
     private static MapObjectImage mapImage = null;
     private float energy;
     private int animalID;
+    private int aliveFor = 1;
 
     private static int newAnimalID = 0;
 
     public Genotype genotype;
     public int deathEpoch = -1;
-    public int aliveFor = 1;
-    public boolean best = false;
     public LinkedList<Animal> children;
+
+    public Animal breed(Animal other){
+        Vector2D possibleBirthPlace = map.getFreeSpotAround(getPosition());
+        Genotype bornGenotype = genotype.giveBirth(other.genotype);
+
+        Animal child = new Animal(map, possibleBirthPlace, bornGenotype);
+        child.setEnergy(getEnergy()*0.25f + other.getEnergy()*0.25f);
+        children.add(child);
+        other.children.add(child);
+
+        setEnergy(0.75f*getEnergy());
+        other.setEnergy(0.75f*other.getEnergy());
+        return child;
+    }
+
+    public int getAliveFor(){
+        return aliveFor;
+    }
 
     public Set<Animal> getDescendants(){
         TreeSet<Animal> descendantsSet = new TreeSet<>();
@@ -62,7 +75,11 @@ public class Animal implements IMapElement, Comparable<Animal> {
         return mapImage.rotated(orientation.toAngle());
     }
 
-    private void AnimalConstruct(IWorldMap map, Vector2D position){
+    public Animal(IWorldMap map, Vector2D position){
+        this(map, position, new Genotype(32));
+    }
+
+    public Animal(IWorldMap map, Vector2D position, Genotype genotype){
         animalID = newAnimalID;
         newAnimalID++;
         children = new LinkedList<>();
@@ -73,15 +90,6 @@ public class Animal implements IMapElement, Comparable<Animal> {
             mapImage = MapObjectImage.load("animal.png");
         this.position = new Vector2D(position.x, position.y);
         map.place(this);
-    }
-
-    public Animal(IWorldMap map, Vector2D position){
-        AnimalConstruct(map, position);
-        this.genotype = new Genotype(32);
-    }
-
-    public Animal(IWorldMap map, Vector2D position, Genotype genotype){
-        AnimalConstruct(map, position);
         this.genotype = genotype;
     }
 
@@ -94,6 +102,7 @@ public class Animal implements IMapElement, Comparable<Animal> {
         Vector2D newPosition = position.add(direction.toUnitVector());
         orientation = direction;
         newPosition = map.targetPositionMapping(newPosition);
+        aliveFor++;
         if(map.canMoveTo(newPosition)){
             this.position = newPosition;
         }

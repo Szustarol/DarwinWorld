@@ -1,7 +1,7 @@
 package main.darwinworld.objects;
 
 import main.darwinworld.MapObjectImage;
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 
 public class Grass implements IMapElement {
     private final Vector2D position;
@@ -27,6 +27,13 @@ public class Grass implements IMapElement {
     @Override
     public String toString(){
         return "*";
+    }
+
+    public void consume(Animal [] consumers){
+        float energyToSpare = energy/consumers.length;
+        for(Animal oneOfBest : consumers){
+            oneOfBest.setEnergy(oneOfBest.getEnergy()+energyToSpare);
+        }
     }
 }
 

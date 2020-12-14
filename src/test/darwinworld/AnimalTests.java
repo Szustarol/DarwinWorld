@@ -2,7 +2,7 @@ package test.darwinworld;
 
 import main.darwinworld.map.MapDirection;
 import main.darwinworld.map.WrappedMap;
-import main.darwinworld.math.Vector2D;
+import main.darwinworld.model.Vector2D;
 import main.darwinworld.objects.Animal;
 import org.junit.Test;
 

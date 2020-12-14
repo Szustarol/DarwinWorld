@@ -1,4 +1,4 @@
-package main.darwinworld.math;
+package main.darwinworld.model;
 
 public class Vector2D implements  Comparable<Vector2D>{
 
